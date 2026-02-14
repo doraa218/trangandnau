@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Valentine Surprise</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+<style>
+  body {
+    margin: 0;
+    font-family: 'Press Start 2P', cursive;
+    background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  .heart {
+    position: absolute;
+    color: #ff4b6e;
+    font-size: 20px;
+    user-select: none;
+    pointer-events: none;
+    animation: fall linear forwards;
+    z-index: 0;
+  }
+
+  @keyframes fall {
+    to { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+  }
+
+  .page {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+    z-index: 10;
+  }
+
+  .page.active { display: flex; animation: fade 0.6s ease; }
+
+  @keyframes fade {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 25px;
+    background: #ff4b6e;
+    color: white;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: 0.3s;
+  }
+
+  .hub {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+  }
+
+  .gift {
+    font-size: 60px;
+    cursor: pointer;
+    transition: 0.3s;
+    background: rgba(255,255,255,0.3);
+    padding: 15px;
+    border-radius: 15px;
+  }
+
+  #music {
+    background: url('https://wallpaperaccess.com/full/2641043.gif') center/cover no-repeat;
+  }
+
+  .music-container {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 25px;
+    border-radius: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 30px;
+    max-width: 850px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .left-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .vinyl-wrapper {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+
+  .vinyl {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .vinyl img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+  }
+
+  .vinyl::after {
+    content: "";
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: #111;
+    border-radius: 50%;
+    z-index: 2;
+    border: 3px solid #333;
+  }
+
+  .rotating { animation: spin 4s linear infinite; }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  .now-playing-bar {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 280px;
+    color: white;
+  }
+
+  .now-playing-bar img { width: 45px; height: 45px; border-radius: 5px; }
+
+ .song-info-mini { 
+    text-align: left; 
+    flex-grow: 1; 
+    font-family: 'Times New Roman', Times, serif; 
+    color: white;
+}
+.song-info-mini #displayTitle { font-size: 14px; font-weight: bold; margin-bottom: 2px; }
+.song-info-mini #displayArtist { font-size: 11px; opacity: 0.8; }
+
+  .playlist {
+    text-align: left;
+    background: #8e2b2b;
+    border-radius: 15px;
+    width: 380px;
+    color: white;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .song-item {
+    font-size: 13px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: 0.2s;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .song-item:hover { background: rgba(255,255,255,0.1); }
+
+  /* Xóa bỏ chế độ chia lưới cũ, thay bằng khung chứa ảnh đơn */
+.gallery {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 95%; /* Chiếm gần hết chiều rộng màn hình */
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.gallery img {
+    width: 100%;
+    height: auto; /* Giữ đúng tỷ lệ ảnh bạn thiết kế */
+    border-radius: 15px; /* Bo góc cho mềm mại */
+    border: 5px solid white; /* Tạo viền như khung ảnh thật */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3); /* Đổ bóng cho ảnh nổi lên */
+}
+/* Hiệu ứng cánh hoa rơi */
+.sakura {
+    position: absolute;
+    background-color: #ffb7c5; /* Màu hồng hoa anh đào */
+    border-radius: 100% 0 100% 0; /* Tạo hình cánh hoa */
+    opacity: 0.7;
+    pointer-events: none;
+    z-index: 5;
+    animation: sakura-fall linear forwards;
+}
+
+@keyframes sakura-fall {
+    0% { transform: translateY(-10vh) translateX(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) translateX(100px) rotate(360deg); opacity: 0; }
+}
+#letter .page {
+    overflow-y: auto; /* Nếu thư dài quá sẽ có thanh cuộn */
+    padding-bottom: 50px;
+}
+/* Hiệu ứng nảy lên */
+@keyframes bounceIn {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.1); }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* --- PHẦN HỘP QUÀ CHUẨN --- */
+.surprise-box {
+    width: 100px;
+    height: 100px;
+    cursor: pointer;
+    /* Sử dụng hình ảnh hộp socola làm nền */
+    background-image: url('hopquaxoanen.png'); 
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: transparent !important; /* Xóa nền trắng cũ */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+    transition: all 0.3s ease;
+    box-shadow: none !important; /* Xóa bóng đổ của khung trắng cũ */
+    border: none !important;
+}
+
+/* Hiệu ứng nảy mạnh khi di chuột vào hộp quà */
+@keyframes heartBounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2) translateY(-15px); }
+}
+
+.surprise-box:hover {
+    animation: heartBounce 0.6s ease-in-out infinite !important;
+    filter: drop-shadow(0 10px 15px rgba(255, 75, 110, 0.4)); /* Tạo bóng đổ quanh hình hộp quà */
+}
+ư.firework-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 999;
+    animation: explode 1s ease-out forwards;
+}
+
+@keyframes explode {
+    0% { transform: translate(0, 0) scale(1); opacity: 1; }
+    100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
+}
+/* Khung chứa các mảnh ghép */
+.puzzle-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    width: 90vw; /* Chiếm 90% chiều ngang màn hình điện thoại */
+    max-width: 500px; /* Không quá to trên máy tính */
+    aspect-ratio: 4 / 3; /* Chỉnh thành 3/4 nếu ảnh của bạn là ảnh dọc */
+    margin: 20px auto;
+    position: relative;
+    border: 8px solid white;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    background-color: rgba(255,255,255,0.2);
+}
+
+.puzzle-piece {
+    width: 100.5%; /* Tăng nhẹ để che khít các khe hở giữa mảnh ghép */
+    height: 100.5%;
+    background-image: url('gallery.png'); 
+    background-size: 400% 400%;
+    transition: all 1.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+/* Làm đẹp thanh cuộn cho phần thư */
+#letter div::-webkit-scrollbar {
+    width: 6px;
+}
+#letter div::-webkit-scrollbar-track {
+    background: transparent;
+}
+#letter div::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 10px;
+}
+/* --- CSS CHO GAME LẬT THẺ --- */
+.memory-game { 
+    display: grid; 
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 8px; 
+    width: 95%; 
+    max-width: 400px; 
+    margin: 15px auto; 
+}
+.memory-card { 
+    aspect-ratio: 1/1; 
+    position: relative; 
+    transform-style: preserve-3d; 
+    transition: transform 0.5s; 
+    cursor: pointer; 
+}
+.memory-card.flip { transform: rotateY(180deg); }
+.card-front, .card-back { 
+    position: absolute; 
+    width: 100%; 
+    height: 100%; 
+    backface-visibility: hidden; 
+    border-radius: 8px; 
+    border: 2px solid white; 
+}
+.card-front { 
+    background-size: cover; 
+    background-position: center; 
+    transform: rotateY(180deg); 
+}
+.card-back { 
+    background-color: #ff4b6e; 
+    background-image: url('hopquaxoanen.png'); /* Dùng đúng file hộp quà bạn đã có */
+    background-size: 60%; 
+    background-repeat: no-repeat; 
+    background-position: center; 
+}
+/* Hiệu ứng khi lật đúng cặp */
+.memory-card.matched {
+    animation: matchSuccess 0.5s ease-in-out;
+    border: 3px solid #2ecc71 !important;
+    box-shadow: 0 0 20px #2ecc71;
+}
+
+@keyframes matchSuccess {
+    0%, 100% { transform: scale(1) rotateY(180deg); }
+    50% { transform: scale(1.1) rotateY(180deg); }
+}
+
+/* Hiệu ứng khi thắng tất cả */
+.game-win-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 20px;
+    color: #ff4b6e;
+    z-index: 100;
+    display: none;
+    box-shadow: 0 0 50px white;
+    width: 80%;
+}
+/* Lớp chữ ẩn sau khung game */
+.game-win-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 40px; /* Làm chữ to hơn cho ấn tượng */
+    color: white;
+    text-shadow: 0 0 15px #ff4b6e, 0 0 30px #ff4b6e;
+    opacity: 0;
+    transition: opacity 2s ease; /* Chữ hiện lên từ từ trong 2 giây */
+    pointer-events: none;
+    z-index: 5;
+    white-space: nowrap;
+    font-weight: bold;
+}
+
+/* Hiệu ứng nhòe và biến mất cho các thẻ */
+.memory-game.game-over .memory-card {
+    filter: blur(15px); /* Nhòe mạnh hơn */
+    opacity: 0;
+    transform: scale(0.3) rotate(20deg); /* Thu nhỏ và xoay nhẹ khi biến mất */
+    transition: all 2s ease;
+    pointer-events: none;
+}
+</style>
+</head>
+<body>
+
+<div class="page active" id="page1">
+  <h1>Happy Valentine's Day 💖</h1>
+  <p>A little journey of surprises is waiting for you...</p>
+  <button onclick="showPage('hub')">START</button>
+</div>
+
+<div class="page" id="hub">
+  <h2 style="color:white; text-shadow: 2px 2px 0px #ff4b6e; margin-top: 40px;">Choose a present 💝</h2>
+  
+  <div class="hub" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; padding: 20px; max-width: 350px; margin: 0 auto;">
+    <div class="surprise-box" onclick="showPage('music')"></div>
+    <div class="surprise-box" onclick="showPage('gallery1')"></div>
+    <div class="surprise-box" onclick="showPage('message')"></div>
+    <div class="surprise-box" onclick="showPage('letter')"></div>
+  </div>
+
+  <button onclick="showPage('page1')" style="margin-top: 30px; position: relative; z-index: 10;">⬅ Back</button>
+</div>
+<div class="page" id="music">
+  <h2 style="color:white; text-shadow: 2px 2px 0px #ff4b6e; font-size: 20px; margin-bottom: 5px;">A SONG/PLAYLIST FOR YOU</h2>
+  <p style="color:white; font-size: 18px; margin-bottom: 25px; font-family: sans-serif;">Press play - this melody carries a little piece of my heart</p>
+
+  <div class="music-container">
+    <div class="left-col">
+      <div class="vinyl-wrapper" id="vinylDisk">
+        <div class="vinyl">
+          <img src="1000101679.png" id="currentCover">
+        </div>
+      </div>
+      <div class="now-playing-bar">
+        <img src="1000101682.jpg" id="miniCover">
+        <div class="song-info-mini">
+          <div id="displayTitle">Valentine</div>
+          <div id="displayArtist">Laufey</div>
+        </div>
+        <div style="cursor: pointer; color: white; font-size: 22px; font-weight: bold;" onclick="togglePlay()">||</div>
+      </div>
+    </div>
+
+   <div class="playlist" style="background: #8e2b2b; padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+  <div style="padding: 20px; display: flex; align-items: flex-end; gap: 15px; background: linear-gradient(transparent, rgba(0,0,0,0.5));">
+    <img src="1000101680.jpg" id="playlistCover" style="width: 100px; height: 100px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-radius: 4px;">
+    <div style="text-align: left; color: white;">
+      <div style="font-size: 9px; text-transform: uppercase; letter-spacing: 1px;">Playlist</div>
+      <div style="font-size: 20px; font-weight: bold; margin: 5px 0; line-height: 1.2;">Valentine's Day\love songs</div>
+      <div style="font-size: 10px; opacity: 0.8;">Save on Spotify • 3 songs</div>
+    </div>
+  </div>
+
+  <div style="padding: 15px; font-family: 'Times New Roman', Times, serif; flex-grow: 1;">
+    <div class="song-item" onclick="playMusic('valentine.mp3', 'Valentine', 'Laufey')">
+      1. <b>Valentine</b> - Laufey <span style="float:right">02:48</span>
+    </div>
+    <div class="song-item" onclick="playMusic('vanvat.mp3', 'Vạn vật như muốn ta bên nhau', 'RIO')">
+      2. <b>Vạn vật như muốn ta bên nhau</b> - RIO <span style="float:right">03:15</span>
+    </div>
+    <div class="song-item" onclick="playMusic('angel.mp3', 'Angel Baby', 'Troye Sivan')">
+      3. <b>Angel Baby</b> - Troye Sivan <span style="float:right">03:40</span>
+    </div>
+  </div>
+  
+  <audio id="mainAudio"></audio>
+</div> </div> <button onclick="showPage('hub')" style="margin-top: 25px; position: relative; z-index: 20;">⬅ Back</button>
+
+</div>
+
+<div class="page" id="gallery1">
+    <h2 style="color:white; text-shadow: 2px 2px 0px #ff4b6e; font-size: 20px; margin-bottom: 20px;">Our photo 📸</h2>
+    
+    <div class="puzzle-container" id="puzzleBoard"></div>
+
+    <button onclick="showPage('hub')" style="margin-top: 30px; position: relative; z-index: 100;">⬅ Back</button>
+</div>
+
+<div class="page" id="message">
+    <h2 style="color:white; text-shadow: 2px 2px 0px #ff4b6e;">Just For You 💝</h2>
+    <p style="color:white; font-size: 12px; margin-bottom: 10px;">Find 8 pairs of memories!</p>
+    
+    <div style="position: relative; width: 100%; max-width: 400px; margin: 0 auto;">
+        <div class="memory-game" id="gameBoard"></div>
+        <div id="winMessage" class="game-win-message">I LOVE YOU ❤️</div>
+    </div>
+
+    <button onclick="showPage('hub')">⬅ Back</button>
+</div>
+<div class="page" id="letter">
+  <h2 style="color:white; text-shadow: 2px 2px 0px #ff4b6e; font-size: 18px; margin-bottom: 10px;">A Letter From My Heart 💌</h2>
+  
+  <div style="background: rgba(255, 255, 255, 0.2); 
+              backdrop-filter: blur(10px); 
+              -webkit-backdrop-filter: blur(10px);
+              width: 95%; 
+              max-width: 650px; /* Tăng chiều ngang từ 500px lên 650px */
+              height: 60vh;    /* Sử dụng vh để tự co giãn theo chiều cao màn hình */
+              max-height: 400px; 
+              padding: 20px; 
+              margin: 0 auto; 
+              border-radius: 15px; 
+              border: 1px solid rgba(255, 255, 255, 0.3);
+              box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
+              text-align: left; 
+              color: white; 
+              font-family: 'Times New Roman', Times, serif; 
+              box-sizing: border-box;
+              display: flex;
+              flex-direction: column;">
+
+    <div style="overflow-y: auto; 
+                flex-grow: 1; 
+                padding-right: 15px;
+                scrollbar-width: thin; 
+                scrollbar-color: rgba(255,255,255,0.5) transparent;">
+      
+      <div style="white-space: pre-line; 
+                  line-height: 1.6; 
+                  font-size: 16px; 
+                  text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">Chào HAnh iu của em 
+Happy Valentine’s Day & our 11-month anniversary!
+
+Cảm ơn quà valentine của của c, em thích lắm hii 
+Cảm ơn HAnh vẫn luôn yêu thương, quan tâm và ở bên cạnh em. 
+
+Hôm trước HAnh dỗi emm, em buồn lắm, là lỗi của em nên em sẽ rút kinh nghiệmm. Mong rằng em sẽ không làm phiền lòng HAnh nữa. Hi vọng câu chuyện của chúng mình sẽ luôn là câu chuyện đẹp 🍓
+
+HAnh của em ăn uống đầy đủ vào để còn có sức làm việc 😾 Em cũng sẽ cố gắng ăn đúng giờ đúng bữa hơn ạ. 
+
+Mong rằng chúng mình sẽ luôn vui, hẹn HAnh 1 vài ngày nữa nhee 😙
+See u soon!! 
+
+mằl uếihn nạd uêy iut ❤️</div>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 15px; margin-top: 15px; justify-content: center;">
+    <button onclick="showPage('hub')" style="background: rgba(255,255,255,0.2); border: 1px solid white; padding: 10px 20px;">⬅ Back</button>
+    <button onclick="showPage('ending')" style="padding: 10px 20px;">Finish 💖</button>
+  </div>
+</div>
+  <div class="page" id="ending">
+  <h1 style="color:white; text-shadow: 3px 3px 0px #ff4b6e; font-size: 24px;">Thank You For This Journey 💞</h1>
+  <div style="font-size: 50px; margin: 20px 0;">💑</div>
+  <p style="color:white; font-size: 14px; line-height: 1.8;">You are my favorite person,<br>today and always.</p>
+  
+  <div style="display:flex; gap:10px; justify-content: center;">
+      <button onclick="showPage('hub')">⬅ Menu</button>
+      <button onclick="showPage('page1')">Replay ↻</button>
+  </div>
+</div>
+<script>
+  // HÀM CHUYỂN TRANG
+ // HÀM CHUYỂN TRANG
+  function showPage(id) {
+    // 1. Ẩn tất cả các trang
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    
+    // 2. Hiện trang mục tiêu
+    const target = document.getElementById(id);
+    if (target) {
+      target.classList.add('active');
+
+      // 3. Logic cho Hub
+      if (id === 'hub') {
+        const boxes = target.querySelectorAll('.surprise-box');
+        boxes.forEach((box) => {
+          box.style.animation = 'none';
+        });
+      }
+
+      // 4. HIỆU ỨNG GHÉP ẢNH (ĐÃ FIX KHỚP HÌNH)
+     if (id === 'gallery1') {
+        const board = document.getElementById('puzzleBoard');
+        board.innerHTML = ''; 
+        
+        for (let i = 0; i < 16; i++) {
+          const piece = document.createElement('div');
+          piece.className = 'puzzle-piece';
+          
+          // Công thức chuẩn cho lưới 4x4 để không lệch form
+          const x = (i % 4) * 33.333; 
+          const y = Math.floor(i / 4) * 33.333;
+          piece.style.backgroundPosition = `${x}% ${y}%`;
+
+          const randomX = (Math.random() - 0.5) * 2000;
+          const randomY = (Math.random() - 0.5) * 2000;
+          const randomRotation = (Math.random() - 0.5) * 1080;
+          
+          piece.style.transform = `translate(${randomX}px, ${randomY}px) rotate(${randomRotation}deg) scale(0)`;
+          piece.style.opacity = '0';
+
+          board.appendChild(piece);
+
+          setTimeout(() => {
+            piece.style.transform = 'translate(0, 0) rotate(0deg) scale(1)';
+            piece.style.opacity = '1';
+          }, 150 + (i * 45)); 
+        }
+      }
+// --- LOGIC CHO TRÒ CHƠI LẬT THẺ ---
+   if (id === 'message') {
+      const gameBoard = document.getElementById('gameBoard');
+      if (gameBoard) {
+        gameBoard.innerHTML = '';
+        const images = ['anh1.jpg', 'anh2.jpeg', 'anh3.jpg', 'anh4.jpg', 'anh5.jpg', 'anh6.jpg', 'anh7.jpg', 'anh8.jpg'];
+        const cardsData = [...images, ...images].sort(() => Math.random() - 0.5);
+        
+        let hasFlipped = false, lock = false, first, second;
+        let matchedPairs = 0; // Biến đếm số cặp đúng
+
+        cardsData.forEach(img => {
+          const card = document.createElement('div');
+          card.className = 'memory-card';
+          card.dataset.img = img;
+          card.innerHTML = `<div class="card-front" style="background-image: url('${img}')"></div><div class="card-back"></div>`;
+          
+          card.onclick = function() {
+            if (lock || this === first || this.classList.contains('matched')) return;
+            this.classList.add('flip');
+            if (!hasFlipped) { hasFlipped = true; first = this; return; }
+            second = this; lock = true;
+            
+            if (first.dataset.img === second.dataset.img) {
+              // LẬT ĐÚNG CẶP
+              first.classList.add('matched');
+              second.classList.add('matched');
+              matchedPairs++;
+              
+              // Chúc mừng nhỏ khi đúng 1 cặp
+              if (typeof launchFireworks === "function") {
+                  setTimeout(launchFireworks, 200); 
+              }
+
+              // KIỂM TRA THẮNG TOÀN BỘ
+              if (matchedPairs === 8) {
+                setTimeout(() => {
+                  // 1. Thêm class làm nhòe và biến mất các thẻ ảnh
+                  gameBoard.classList.add('game-over');
+                  
+                  // 2. Hiện dòng chữ I LOVE YOU từ dưới lớp ảnh
+                  const winMsg = document.getElementById('winMessage');
+                  if(winMsg) winMsg.style.opacity = '1';
+
+                  // 3. Bắn pháo hoa ăn mừng lớn (15 đợt liên tục)
+                  for(let i = 0; i < 15; i++) {
+                    setTimeout(launchFireworks, i * 300);
+                  }
+                }, 1000); 
+              }
+
+              resetBoard();
+            } else {
+              // LẬT SAI
+              setTimeout(() => { 
+                first.classList.remove('flip'); 
+                second.classList.remove('flip'); 
+                resetBoard(); 
+              }, 1000);
+            }
+          };
+          gameBoard.appendChild(card);
+        });
+
+        function resetBoard() {
+          [hasFlipped, lock] = [false, false];
+          [first, second] = [null, null];
+        }
+      }
+    }
+
+      // 5. Bắn pháo hoa
+      if (id === 'ending') {
+        for(let i=0; i<5; i++) {
+          setTimeout(launchFireworks, i * 400);
+        }
+      }
+    }
+  }
+  // HÀM TẠO PHÁO HOA
+  function launchFireworks() {
+    const startX = Math.random() * 80 + 10;
+    const startY = Math.random() * 40 + 30;
+    for (let i = 0; i < 60; i++) {
+      const particle = document.createElement('div');
+      particle.classList.add('firework-particle');
+      const colors = ['#ff4b6e', '#ff9a9e', '#ffffff', '#ffff00', '#00ffff'];
+      particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+      particle.style.left = startX + 'vw';
+      particle.style.top = startY + 'vh';
+      const angle = Math.random() * Math.PI * 2;
+      const velocity = Math.random() * 180 + 80;
+      particle.style.setProperty('--dx', `${Math.cos(angle) * velocity}px`);
+      particle.style.setProperty('--dy', `${Math.sin(angle) * velocity}px`);
+      document.body.appendChild(particle);
+      setTimeout(() => particle.remove(), 1200);
+    }
+  }
+
+  // CÁC HIỆU ỨNG RƠI (TRÁI TIM & HOA ANH ĐÀO)
+  function createHeart() {
+    const heart = document.createElement('div');
+    heart.classList.add('heart');
+    heart.innerHTML = '❤️';
+    heart.style.left = Math.random() * 100 + 'vw';
+    heart.style.animationDuration = (Math.random() * 3 + 2) + 's';
+    heart.style.fontSize = (Math.random() * 10 + 15) + 'px';
+    document.body.appendChild(heart);
+    setTimeout(() => heart.remove(), 5000);
+  }
+  setInterval(createHeart, 300);
+
+  function createSakura() {
+    if (!document.getElementById('gallery1').classList.contains('active')) return;
+    const sakura = document.createElement('div');
+    sakura.classList.add('sakura');
+    const size = Math.random() * 10 + 5 + 'px';
+    sakura.style.width = size; sakura.style.height = size;
+    sakura.style.left = Math.random() * 100 + 'vw';
+    sakura.style.animationDuration = Math.random() * 3 + 4 + 's';
+    document.body.appendChild(sakura);
+    setTimeout(() => sakura.remove(), 6000);
+  }
+  setInterval(createSakura, 200);
+
+  // PHẦN NHẠC
+  const audio = document.getElementById('mainAudio');
+  const vinylDisk = document.getElementById('vinylDisk');
+
+  function togglePlay() {
+    if (!audio.src) return alert("Select a song first!");
+    if (audio.paused) {
+      audio.play();
+      vinylDisk.classList.add('rotating');
+    } else {
+      audio.pause();
+      vinylDisk.classList.remove('rotating');
+    }
+  }
+
+  function playMusic(link, title, artist) {
+    audio.src = link;
+    audio.play();
+    vinylDisk.classList.add('rotating');
+    document.getElementById('displayTitle').innerHTML = "<b>" + title + "</b>";
+    document.getElementById('displayArtist').innerText = artist;
+  }
+</script>
+
+</body>
+</html>
